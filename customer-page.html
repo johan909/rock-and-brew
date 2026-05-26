@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claim Your Discount — Rocks & Brews</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9922A;
+    --gold-light: #F5DFA0;
+    --gold-dark: #8A6018;
+    --cream: #FAF6EE;
+    --charcoal: #1E1A14;
+    --charcoal-mid: #3D3728;
+    --muted: #7A6E5A;
+    --white: #FFFFFF;
+    --red: #B03A2E;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--charcoal);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 20%, rgba(201,146,42,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 80% 80%, rgba(176,58,46,0.1) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    background: var(--cream);
+    border-radius: 24px;
+    max-width: 460px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  }
+
+  .hero {
+    background: var(--charcoal-mid);
+    padding: 2.5rem 2rem 2rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0; right: 0;
+    height: 24px;
+    background: var(--cream);
+    border-radius: 24px 24px 0 0;
+  }
+
+  .discount-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gold);
+    color: var(--charcoal);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 1.2rem;
+  }
+
+  .discount-badge::before {
+    content: '✦';
+    font-size: 9px;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 8vw, 3rem);
+    color: var(--gold-light);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero .sub {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin-bottom: 0;
+  }
+
+  .restaurant-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.8rem;
+    opacity: 0.85;
+  }
+
+  .body {
+    padding: 2rem 2rem 2.5rem;
+  }
+
+  .offer-strip {
+    background: var(--charcoal);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .offer-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    color: var(--gold);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .offer-text {
+    color: var(--cream);
+    font-size: 0.88rem;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  .offer-text strong {
+    font-weight: 500;
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    margin-top: 1rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid #E0D8C8;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--charcoal);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus {
+    border-color: var(--gold);
+  }
+
+  input::placeholder {
+    color: #C0B9AC;
+  }
+
+  .privacy-note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .privacy-note a {
+    color: var(--gold-dark);
+    text-decoration: none;
+  }
+
+  .btn {
+    display: block;
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 15px;
+    background: var(--charcoal);
+    color: var(--gold-light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    position: relative;
+  }
+
+  .btn:hover { background: var(--charcoal-mid); }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .btn-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(245,223,160,0.3);
+    border-top-color: var(--gold-light);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-msg {
+    color: var(--red);
+    font-size: 0.8rem;
+    margin-top: 6px;
+    display: none;
+  }
+
+  /* Success state */
+  .success-screen {
+    display: none;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .checkmark {
+    width: 64px; height: 64px;
+    background: var(--charcoal);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 28px;
+  }
+
+  .success-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--charcoal);
+    margin-bottom: 0.5rem;
+  }
+
+  .success-screen p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .coupon-box {
+    background: var(--charcoal);
+    border-radius: 14px;
+    padding: 1.25rem;
+    text-align: center;
+    margin: 0 auto;
+    max-width: 280px;
+  }
+
+  .coupon-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .coupon-code {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+  }
+
+  .coupon-sub {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .show-coupon-code {
+    color: var(--cream) !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="hero">
+    <div class="restaurant-name">Rocks & Brews</div>
+    <div class="discount-badge">Exclusive Offer</div>
+    <h1>Unlock Your<br>Table Perk</h1>
+    <p class="sub">Share your details, savour the savings</p>
+  </div>
+
+  <div id="form-view">
+    <div class="body">
+      <div class="offer-strip">
+        <div class="offer-pct">5%</div>
+        <div class="offer-text">
+          <strong>Off your entire bill</strong>
+          Valid today only · dine-in &amp; takeaway
+        </div>
+      </div>
+
+      <label for="name">Your name</label>
+      <input type="text" id="name" placeholder="Riya Menon" autocomplete="name" />
+      <div class="error-msg" id="err-name">Please enter your name.</div>
+
+      <label for="email">Email address</label>
+      <input type="email" id="email" placeholder="riya@example.com" autocomplete="email" />
+      <div class="error-msg" id="err-email">Please enter a valid email.</div>
+
+      <label for="phone">Phone number</label>
+      <input type="tel" id="phone" placeholder="+91 98765 43210" autocomplete="tel" />
+      <div class="error-msg" id="err-phone">Please enter a valid phone number.</div>
+
+      <p class="privacy-note">By submitting, you agree to receive occasional offers via SMS. We never share your data. <a href="#">Privacy policy →</a></p>
+
+      <button class="btn" id="submit-btn" onclick="handleSubmit()">
+        <div class="btn-inner">
+          <div class="spinner" id="spinner"></div>
+          <span id="btn-text">Claim my discount</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div class="success-screen" id="success-view">
+    <div class="checkmark">✦</div>
+    <h2>You're all set!</h2>
+    <p>Show this code to your server. Enjoy your meal at Rocks & Brews.</p>
+    <div class="coupon-box">
+      <div class="coupon-label">Your discount code</div>
+      <div class="coupon-code show-coupon-code" id="coupon-display">ROCKS10</div>
+      <div class="coupon-sub">5% off · valid today</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── CONFIG ─────────────────────────────────────────────────────────────────
+  // Replace with your actual backend API endpoint (see README)
+  const API_URL = 'http://localhost:3001/api/register';
+  const DISCOUNT_CODE = 'ROCKS10';
+  const RESTAURANT_NAME = 'Rocks & Brews';
+  // ────────────────────────────────────────────────────────────────────────────
+
+  function validate() {
+    let ok = true;
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+
+    document.getElementById('err-name').style.display = name ? 'none' : 'block';
+    if (!name) ok = false;
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    document.getElementById('err-email').style.display = emailOk ? 'none' : 'block';
+    if (!emailOk) ok = false;
+
+    const phoneOk = phone.replace(/\D/g,'').length >= 7;
+    document.getElementById('err-phone').style.display = phoneOk ? 'none' : 'block';
+    if (!phoneOk) ok = false;
+
+    return ok;
+  }
+
+  async function handleSubmit() {
+    if (!validate()) return;
+
+    const btn = document.getElementById('submit-btn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btn-text');
+
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    btnText.textContent = 'Saving your details…';
+
+    const payload = {
+      name: document.getElementById('name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      restaurant: RESTAURANT_NAME,
+      scanned_at: new Date().toISOString(),
+      discount_code: DISCOUNT_CODE
+    };
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error('Server error');
+
+      showSuccess();
+    } catch (err) {
+      // For demo: still show success — remove this in production
+      showSuccess();
+      // In production: show an error message instead
+    }
+  }
+
+  function showSuccess() {
+    document.getElementById('form-view').style.display = 'none';
+    const sv = document.getElementById('success-view');
+    sv.style.display = 'block';
+    document.getElementById('coupon-display').textContent = DISCOUNT_CODE;
+  }
+</script>
+
+</body>
+</html>

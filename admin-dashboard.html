@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — Rocks & Brews</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F1;
+    --surface: #FFFFFF;
+    --border: #E5E0D5;
+    --gold: #C9922A;
+    --gold-bg: #FDF4E3;
+    --charcoal: #1E1A14;
+    --text: #2C2820;
+    --muted: #7A6E5A;
+    --green: #2E7D5B;
+    --green-bg: #E8F5EF;
+    --red: #B03A2E;
+    --red-bg: #FDECEA;
+    --blue: #1A5FA8;
+    --blue-bg: #E8F0FA;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px;
+    background: var(--charcoal);
+    padding: 2rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #F5DFA0;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.02em;
+  }
+
+  .sidebar-sub {
+    font-size: 0.72rem;
+    color: #7A6E5A;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    color: #A09480;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    margin-bottom: 2px;
+  }
+
+  .nav-item.active, .nav-item:hover {
+    background: rgba(201,146,42,0.12);
+    color: #F5DFA0;
+  }
+
+  .nav-icon { font-size: 16px; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    font-size: 0.72rem;
+    color: #4A4438;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* ── Main ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topbar h1 { font-size: 1.1rem; font-weight: 500; }
+  .topbar-meta { font-size: 0.82rem; color: var(--muted); }
+
+  .content { padding: 2rem; overflow-y: auto; }
+
+  /* ── Stat cards ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 1.9rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-note {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── SMS panel ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .panel-body { padding: 1.5rem; }
+
+  /* Twilio config */
+  .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+
+  .field-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  input[type="text"], input[type="password"], textarea, select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus,
+  textarea:focus { border-color: var(--gold); }
+
+  input[type="password"] { font-family: 'DM Mono', monospace; font-size: 0.82rem; }
+
+  textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+
+  .char-count { font-size: 0.72rem; color: var(--muted); text-align: right; margin-top: 4px; }
+
+  /* Recipient list */
+  .recipient-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+
+  .recipient-row:last-child { border-bottom: none; }
+  .rec-name { font-weight: 500; }
+  .rec-phone { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--muted); }
+  .rec-date { font-size: 0.75rem; color: var(--muted); }
+
+  .badge {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 100px;
+  }
+
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-gold { background: var(--gold-bg); color: var(--gold); }
+  .badge-red { background: var(--red-bg); color: var(--red); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); }
+
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 1.25rem;
+  }
+
+  .btn-primary {
+    background: var(--charcoal);
+    color: #F5DFA0;
+    border: none;
+    border-radius: 9px;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 9px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-outline:hover { background: var(--bg); }
+
+  /* Log */
+  .log-entry {
+    font-size: 0.8rem;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: var(--muted);
+  }
+
+  .log-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .log-ok { color: var(--green); }
+  .log-err { color: var(--red); }
+
+  .section-divider {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+
+  .progress-bar-wrap {
+    background: var(--bg);
+    border-radius: 100px;
+    height: 6px;
+    overflow: hidden;
+    margin: 0.75rem 0;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 100px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  .sending-status {
+    font-size: 0.82rem;
+    color: var(--muted);
+    display: none;
+    margin-top: 6px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--charcoal);
+    color: #F5DFA0;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+
+  .search-row input { max-width: 280px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 700px) {
+    .sidebar { display: none; }
+    .config-grid { grid-template-columns: 1fr; }
+    .content { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Rocks & Brews</div>
+    <div class="sidebar-sub">Admin Portal</div>
+
+    <nav>
+      <div class="nav-item active">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">👥</span> Customers
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">💬</span> SMS Campaigns
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">⚙️</span> Settings
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      QR Loyalty System<br>v1.0
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <h1>QR Customer Dashboard</h1>
+      <div class="topbar-meta" id="topbar-date"></div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total scans</div>
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-note">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Today</div>
+          <div class="stat-value" id="stat-today">0</div>
+          <div class="stat-note" id="stat-today-date">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">SMS sent</div>
+          <div class="stat-value" id="stat-sms">0</div>
+          <div class="stat-note">All campaigns</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Discount code</div>
+          <div class="stat-value" style="font-size:1.3rem; font-family: 'DM Mono', monospace;">ROCKS10</div>
+          <div class="stat-note">5% off</div>
+        </div>
+      </div>
+
+      <!-- Twilio Config -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">⚙️ Twilio SMS Configuration</div>
+          <span class="badge badge-gold" id="twilio-status-badge">Not configured</span>
+        </div>
+        <div class="panel-body">
+          <div class="config-grid">
+            <div class="field-group">
+              <div class="field-label">Account SID</div>
+              <input type="text" id="twilio-sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+            </div>
+            <div class="field-group">
+              <div class="field-label">Auth Token</div>
+              <input type="password" id="twilio-token" placeholder="Your Twilio auth token" />
+            </div>
+            <div class="field-group">
+              <div class="field-label">From Number</div>
+              <input type="text" id="twilio-from" placeholder="+1 415 555 0100" />
+            </div>
+            <div class="field-group">
+              <div class="field-label">Backend API URL</div>
+              <input type="text" id="backend-url" placeholder="https://your-backend.com/api" />
+            </div>
+          </div>
+          <button class="btn-primary" onclick="saveConfig()">💾 Save configuration</button>
+        </div>
+      </div>
+
+      <!-- Customer List + SMS -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">👥 Registered Customers</div>
+          <button class="btn-outline" onclick="loadCustomers()" style="font-size:0.8rem; padding:6px 12px;">↻ Refresh</button>
+        </div>
+        <div class="panel-body">
+
+          <div class="search-row">
+            <input type="text" id="search-input" placeholder="Search by name or phone…" oninput="filterCustomers()" />
+            <button class="btn-outline" onclick="exportCSV()">⬇ Export CSV</button>
+          </div>
+
+          <div class="section-divider">Customer list</div>
+          <div id="customer-list">
+            <div class="empty-state">No customers yet. Customers appear here after scanning the QR code.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bulk SMS -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">💬 Send Bulk SMS</div>
+          <span class="badge badge-blue" id="recipient-count-badge">0 recipients</span>
+        </div>
+        <div class="panel-body">
+
+          <div class="field-group" style="margin-bottom: 1rem;">
+            <div class="field-label">Message (SMS)</div>
+            <textarea id="sms-message" maxlength="160" oninput="updateCharCount()" placeholder="Hi {name}! Thank you for visiting Rocks & Brews. Come back soon for another 5% off with code ROCKS10. Show this to your server!"></textarea>
+            <div class="char-count"><span id="char-used">0</span>/160 characters · <span id="sms-parts">1</span> SMS part</div>
+          </div>
+
+          <div class="field-group" style="margin-bottom: 1rem;">
+            <div class="field-label">Send to</div>
+            <select id="send-target">
+              <option value="all">All customers</option>
+              <option value="today">Today's customers only</option>
+              <option value="selected">Selected customers</option>
+            </select>
+          </div>
+
+          <div class="progress-bar-wrap" id="progress-wrap" style="display:none">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+          <div class="sending-status" id="sending-status"></div>
+
+          <div class="btn-row">
+            <button class="btn-primary" id="send-btn" onclick="sendBulkSMS()">
+              📱 Send SMS campaign
+            </button>
+            <button class="btn-outline" onclick="previewSMS()">Preview message</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Send Log -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">📋 Send Log</div>
+          <button class="btn-outline" onclick="clearLog()" style="font-size:0.8rem; padding:6px 12px;">Clear</button>
+        </div>
+        <div class="panel-body" style="max-height: 260px; overflow-y: auto;">
+          <div id="send-log">
+            <div class="log-entry"><span class="log-time">—</span> <span>No messages sent yet.</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let customers = [];
+let config = {};
+let smsSentTotal = 0;
+
+// ─── DEMO SEED DATA (remove in production) ───────────────────────────────────
+const DEMO_CUSTOMERS = [
+  { name: 'Riya Menon', email: 'riya@example.com', phone: '+919876543210', scanned_at: new Date().toISOString(), status: 'new' },
+  { name: 'Arjun Nair', email: 'arjun@example.com', phone: '+919845001234', scanned_at: new Date(Date.now()-86400000).toISOString(), status: 'returning' },
+  { name: 'Priya Thomas', email: 'priya@example.com', phone: '+919812345678', scanned_at: new Date(Date.now()-172800000).toISOString(), status: 'new' },
+  { name: 'Kiran Raj', email: 'kiran@example.com', phone: '+919900112233', scanned_at: new Date().toISOString(), status: 'new' },
+];
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('stat-today-date').textContent = new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+
+  loadConfig();
+  customers = DEMO_CUSTOMERS; // replace with loadCustomers() pointing to your backend
+  renderCustomers(customers);
+  updateStats();
+  updateRecipientCount();
+};
+
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+function loadConfig() {
+  const saved = localStorage.getItem('spice_ember_config');
+  if (saved) {
+    config = JSON.parse(saved);
+    document.getElementById('twilio-sid').value = config.sid || '';
+    document.getElementById('twilio-token').value = config.token || '';
+    document.getElementById('twilio-from').value = config.from || '';
+    document.getElementById('backend-url').value = config.backendUrl || '';
+    if (config.sid && config.token) {
+      document.getElementById('twilio-status-badge').textContent = 'Configured';
+      document.getElementById('twilio-status-badge').className = 'badge badge-green';
+    }
+  }
+}
+
+function saveConfig() {
+  config = {
+    sid: document.getElementById('twilio-sid').value.trim(),
+    token: document.getElementById('twilio-token').value.trim(),
+    from: document.getElementById('twilio-from').value.trim(),
+    backendUrl: document.getElementById('backend-url').value.trim(),
+  };
+  localStorage.setItem('spice_ember_config', JSON.stringify(config));
+  document.getElementById('twilio-status-badge').textContent = 'Configured ✓';
+  document.getElementById('twilio-status-badge').className = 'badge badge-green';
+  showToast('✅ Configuration saved');
+}
+
+// ─── CUSTOMERS ────────────────────────────────────────────────────────────────
+async function loadCustomers() {
+  if (!config.backendUrl) { showToast('⚠️ Set your backend URL first'); return; }
+  try {
+    const res = await fetch(config.backendUrl + '/customers');
+    customers = await res.json();
+    renderCustomers(customers);
+    updateStats();
+    updateRecipientCount();
+    showToast('✅ Customers refreshed');
+  } catch {
+    showToast('❌ Could not fetch customers from backend');
+  }
+}
+
+function renderCustomers(list) {
+  const el = document.getElementById('customer-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state">No customers registered yet.</div>';
+    return;
+  }
+  el.innerHTML = list.map((c, i) => `
+    <div class="recipient-row">
+      <div>
+        <div class="rec-name">${esc(c.name)}</div>
+        <div class="rec-phone">${esc(c.phone)} · ${esc(c.email)}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="rec-date">${formatDate(c.scanned_at)}</div>
+        <span class="badge ${c.status === 'returning' ? 'badge-blue' : 'badge-green'}">${c.status || 'new'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterCustomers() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const filtered = customers.filter(c => c.name.toLowerCase().includes(q) || c.phone.includes(q));
+  renderCustomers(filtered);
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = customers.length;
+  const today = new Date().toDateString();
+  const todayCount = customers.filter(c => new Date(c.scanned_at).toDateString() === today).length;
+  document.getElementById('stat-today').textContent = todayCount;
+  document.getElementById('stat-sms').textContent = smsSentTotal;
+}
+
+function updateRecipientCount() {
+  const target = document.getElementById('send-target').value;
+  let count = 0;
+  if (target === 'all') count = customers.length;
+  else if (target === 'today') {
+    const today = new Date().toDateString();
+    count = customers.filter(c => new Date(c.scanned_at).toDateString() === today).length;
+  }
+  document.getElementById('recipient-count-badge').textContent = `${count} recipients`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('send-target');
+  if (sel) sel.addEventListener('change', updateRecipientCount);
+});
+
+// ─── SMS ──────────────────────────────────────────────────────────────────────
+function updateCharCount() {
+  const len = document.getElementById('sms-message').value.length;
+  document.getElementById('char-used').textContent = len;
+  document.getElementById('sms-parts').textContent = Math.ceil(len / 160) || 1;
+}
+
+function previewSMS() {
+  const msg = document.getElementById('sms-message').value;
+  const sample = customers[0] || { name: 'Customer' };
+  const preview = msg.replace(/{name}/g, sample.name).replace(/{phone}/g, sample.phone);
+  showToast('Preview: ' + preview.substring(0, 80) + (preview.length > 80 ? '…' : ''));
+}
+
+function getTargetCustomers() {
+  const target = document.getElementById('send-target').value;
+  if (target === 'today') {
+    const today = new Date().toDateString();
+    return customers.filter(c => new Date(c.scanned_at).toDateString() === today);
+  }
+  return customers;
+}
+
+async function sendBulkSMS() {
+  const msg = document.getElementById('sms-message').value.trim();
+  if (!msg) { showToast('⚠️ Enter a message first'); return; }
+
+  const targets = getTargetCustomers();
+  if (!targets.length) { showToast('⚠️ No customers to message'); return; }
+
+  if (!config.sid || !config.token || !config.from) {
+    showToast('⚠️ Configure Twilio first');
+    return;
+  }
+
+  const confirmed = confirm(`Send SMS to ${targets.length} customer(s)?\n\n"${msg.substring(0, 100)}..."`);
+  if (!confirmed) return;
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  const wrap = document.getElementById('progress-wrap');
+  const fill = document.getElementById('progress-fill');
+  const status = document.getElementById('sending-status');
+  wrap.style.display = 'block';
+  status.style.display = 'block';
+
+  let sent = 0, failed = 0;
+
+  for (let i = 0; i < targets.length; i++) {
+    const c = targets[i];
+    const body = msg.replace(/{name}/g, c.name).replace(/{phone}/g, c.phone);
+    status.textContent = `Sending to ${c.name} (${i + 1}/${targets.length})…`;
+    fill.style.width = `${((i + 1) / targets.length) * 100}%`;
+
+    try {
+      // ── TWILIO API CALL ──────────────────────────────────────────────────────
+      // In production this should go through your backend to keep credentials safe.
+      // If calling directly from browser (CORS must be enabled):
+      const formData = new URLSearchParams();
+      formData.append('To', c.phone);
+      formData.append('From', config.from);
+      formData.append('Body', body);
+
+      const res = await fetch(
+        `https://api.twilio.com/2010-04-01/Accounts/${config.sid}/Messages.json`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Basic ' + btoa(`${config.sid}:${config.token}`),
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData.toString()
+        }
+      );
+
+      if (res.ok) {
+        sent++;
+        addLog(c.name, c.phone, 'ok');
+      } else {
+        const err = await res.json();
+        failed++;
+        addLog(c.name, c.phone, 'err', err.message || 'Unknown error');
+      }
+    } catch (e) {
+      failed++;
+      addLog(c.name, c.phone, 'err', e.message);
+    }
+
+    // Small delay to avoid rate limits
+    await delay(200);
+  }
+
+  smsSentTotal += sent;
+  updateStats();
+  wrap.style.display = 'none';
+  status.style.display = 'none';
+  btn.disabled = false;
+  fill.style.width = '0%';
+
+  showToast(`✅ Sent: ${sent} · Failed: ${failed}`);
+}
+
+// ─── LOG ──────────────────────────────────────────────────────────────────────
+function addLog(name, phone, type, errMsg = '') {
+  const log = document.getElementById('send-log');
+  const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `
+    <span class="log-time">${time}</span>
+    <span class="${type === 'ok' ? 'log-ok' : 'log-err'}">
+      ${type === 'ok' ? '✓' : '✗'} ${esc(name)} (${esc(phone)})${errMsg ? ' — ' + esc(errMsg) : ''}
+    </span>
+  `;
+  if (log.querySelector('.log-entry:only-child span.log-time')?.textContent === '—') {
+    log.innerHTML = '';
+  }
+  log.prepend(entry);
+}
+
+function clearLog() {
+  document.getElementById('send-log').innerHTML = '<div class="log-entry"><span class="log-time">—</span> <span>Log cleared.</span></div>';
+}
+
+// ─── EXPORT ───────────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!customers.length) { showToast('No customers to export'); return; }
+  const rows = [['Name', 'Email', 'Phone', 'Scanned At', 'Status']];
+  customers.forEach(c => rows.push([c.name, c.email, c.phone, c.scanned_at, c.status || 'new']));
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `customers_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'flex';
+  clearTimeout(t._hide);
+  t._hide = setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+</script>
+
+</body>
+</html>
