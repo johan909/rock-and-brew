@@ -1,15 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const Database = require('better-sqlite3');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 
 const app = express();
-const db = new Database('customers.db');
+const db = new sqlite3.Database('customers.db');
 
 app.use(cors());
 app.use(bodyParser.json());
 
-db.exec(`
+db.run(`
   CREATE TABLE IF NOT EXISTS customers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -27,20 +28,25 @@ app.post('/api/register', (req, res) => {
   const { name, email, phone, restaurant, discount_code, scanned_at } = req.body;
   if (!name || !phone) return res.status(400).json({ error: 'name and phone required' });
 
-  db.prepare(`
-    INSERT INTO customers (name, email, phone, restaurant, discount_code, scanned_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(name, email, phone, restaurant, discount_code, scanned_at || new Date().toISOString());
-
-  res.json({ success: true, discount_code: discount_code || 'SPICE20' });
+  db.run(
+    `INSERT INTO customers (name, email, phone, restaurant, discount_code, scanned_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [name, email, phone, restaurant, discount_code, scanned_at || new Date().toISOString()],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true, discount_code: discount_code || 'ROCKS10' });
+    }
+  );
 });
 
 app.get('/api/customers', (req, res) => {
-  const rows = db.prepare('SELECT * FROM customers ORDER BY scanned_at DESC').all();
-  res.json(rows);
+  db.all('SELECT * FROM customers ORDER BY scanned_at DESC', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
 });
 
-const path = require('path');
 app.use(express.static(path.join(__dirname)));
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
