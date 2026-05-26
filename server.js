@@ -42,5 +42,5 @@ app.get('/api/customers', (req, res) => {
 
 const path = require('path');
 app.use(express.static(path.join(__dirname)));
-
-app.listen(3001, () => console.log('✅ Server running on http://localhost:3001'));
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
